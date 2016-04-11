@@ -1,0 +1,16 @@
+$black: #000;
+$white: #fff;
+$red: #f00;
+
+// Font, make sure, that $typo-fonts is not false and has at least 1 item
+$base-font: sans-serif;
+
+// Base font (10px)
+$base-font-size: 62.5%;
+$base-line-height: 1;
+
+// Default font unit
+$base-font-unit: rem;
+
+// Fallback font unit
+$base-fallback-font-unit: px;

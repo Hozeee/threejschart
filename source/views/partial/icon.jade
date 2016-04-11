@@ -1,0 +1,4 @@
+mixin icon(src, _class, width, height)
+    i.icon-wrapper(class="icon-wrapper icon-#{src} #{_class ? _class : ''}")
+        svg(viewBox="0 0 #{width ? width : 256} #{height ? width : 256}")
+            use(xlink:href='#icon-#{src}')

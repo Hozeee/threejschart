@@ -1,0 +1,63 @@
+# Ignore paths that contain user-generated content.
+docroot/files
+docroot/sites/*/private
+acquia-files
+docroot/vendor
+
+# WebStorm settings
+.idea/
+
+# SublimeText
+*.sublime-workspace
+
+# OS X
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# SASS
+*.sass-cache
+
+# SVN
+.svn/
+
+# Node.js modules
+node_modules/
+
+# TEMP
+temp/
+
+# DOC
+code-documentation/
+
+# Coverage report
+coverage/
+
+# Complexity report
+complexity-report/
+
+# Gem
+.bundle/
+
+# Bower lib
+.bower/
+.bower_temp/
+bower_components/
+bower.json
+
+# SCSS linter report file
+scss-lint-report.xml
+
+# Middleman compiled config
+config.rb
+
+# WebStorm Atlassian plugin
+atlassian-ide-plugin.xml

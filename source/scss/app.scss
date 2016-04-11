@@ -1,0 +1,11 @@
+// Modules and variables
+@import 'base/base';
+@import 'vendor/vendor';
+@import 'module/module';
+// Page layout
+@import 'layout/layout';
+
+.page {
+	background: $white;
+	position: relative;
+}
