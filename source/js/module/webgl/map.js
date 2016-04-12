@@ -14,7 +14,7 @@ class Map3D {
 	initWorld() {
 		this.world = new THREE.Object3D();
 		this.world.rotation.y = -Math.PI / 2;
-		//scene.add(world);
+		this.scene.add(this.world);
 
 		this.worldContainer = new THREE.Object3D();
 		this.worldContainer.rotation.x = -Math.PI / 2;
@@ -24,10 +24,9 @@ class Map3D {
 	initTerrain() {
 		console.log('Map initTerrain');
 
-		var geometry = new THREE.BoxGeometry( 10, 10, 10 );
-		var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-		var cube = new THREE.Mesh( geometry, material );
-		this.scene.add( cube );
+		if (this.terrain3D) {
+			this.terrain3D.createMapTerrain();
+		}
 	}
 
 	render() {

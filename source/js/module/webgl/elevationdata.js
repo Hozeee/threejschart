@@ -1,24 +1,23 @@
 class ElevationData {
-	init() {
-		console.log('ElevationData init');
-	}
 
-	initElevationMaps() {
+	static initElevationMaps() {
+		//let imageURL = './i/azerelevation_map_small2.jpg';
+		let imageURL = './i/worldmap.jpg';
+
 		this.elevationData = {};
 
 		return new Promise((resolve, reject) => {
 
-			this.loadElevationMap({imageURL: './i/azerelevation_map_small2.jpg', matrix: true})
+			ElevationData.loadElevationMap({imageURL: imageURL, matrix: true})
 				.then((response) => {
 					this.elevationData.country = response;
 					resolve();
 				});
 		});
 
-
 	}
 
-	loadElevationMap(data) {
+	static loadElevationMap(data) {
 
 		return new Promise((resolve, reject) => {
 			var img = new Image(),
@@ -108,6 +107,10 @@ class ElevationData {
 			img.src = data.imageURL;
 		});
 
+	}
+
+	static getElevationMap() {
+		return this.elevationData;
 	}
 
 }

@@ -1,5 +1,4 @@
 import ImageProcessor from './imageprocessor';
-import Skybox from './skybox';
 import ElevationData from './elevationdata';
 import Map3d from './map';
 
@@ -16,11 +15,7 @@ class WebGl {
 		this.initCamera();
 		this.initLights();
 
-		this.skybox = new Skybox();
-		this.skybox.init({scene: this.scene});
-
-		this.elevationData = new ElevationData();
-		this.elevationData.initElevationMaps().then(() => {
+		ElevationData.initElevationMaps().then(() => {
 			this.init3dMap();
 		});
 
@@ -44,7 +39,7 @@ class WebGl {
 	}
 
 	initLights() {
-		let ambientLight = new THREE.AmbientLight(0x222222),
+		let ambientLight = new THREE.AmbientLight(0x000000),
 			pointLight;
 
 		this.scene.add(ambientLight);

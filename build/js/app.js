@@ -46,7 +46,7 @@ var App = function () {
 
 exports.default = App;
 
-},{"./webgl/webgl":8}],2:[function(require,module,exports){
+},{"./webgl/webgl":7}],2:[function(require,module,exports){
 'use strict';
 
 var _app = require('./app.js');
@@ -73,21 +73,19 @@ var ElevationData = function () {
 		_classCallCheck(this, ElevationData);
 	}
 
-	_createClass(ElevationData, [{
-		key: 'init',
-		value: function init() {
-			console.log('ElevationData init');
-		}
-	}, {
+	_createClass(ElevationData, null, [{
 		key: 'initElevationMaps',
 		value: function initElevationMaps() {
 			var _this = this;
+
+			//let imageURL = './i/azerelevation_map_small2.jpg';
+			var imageURL = './i/worldmap.jpg';
 
 			this.elevationData = {};
 
 			return new Promise(function (resolve, reject) {
 
-				_this.loadElevationMap({ imageURL: './i/azerelevation_map_small2.jpg', matrix: true }).then(function (response) {
+				ElevationData.loadElevationMap({ imageURL: imageURL, matrix: true }).then(function (response) {
 					_this.elevationData.country = response;
 					resolve();
 				});
@@ -180,6 +178,11 @@ var ElevationData = function () {
 
 				img.src = data.imageURL;
 			});
+		}
+	}, {
+		key: 'getElevationMap',
+		value: function getElevationMap() {
+			return this.elevationData;
 		}
 	}]);
 
@@ -281,7 +284,7 @@ var Map3D = function () {
 		value: function initWorld() {
 			this.world = new THREE.Object3D();
 			this.world.rotation.y = -Math.PI / 2;
-			//scene.add(world);
+			this.scene.add(this.world);
 
 			this.worldContainer = new THREE.Object3D();
 			this.worldContainer.rotation.x = -Math.PI / 2;
@@ -292,10 +295,9 @@ var Map3D = function () {
 		value: function initTerrain() {
 			console.log('Map initTerrain');
 
-			var geometry = new THREE.BoxGeometry(10, 10, 10);
-			var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-			var cube = new THREE.Mesh(geometry, material);
-			this.scene.add(cube);
+			if (this.terrain3D) {
+				this.terrain3D.createMapTerrain();
+			}
 		}
 	}, {
 		key: 'render',
@@ -312,7 +314,7 @@ var Map3D = function () {
 
 exports.default = Map3D;
 
-},{"./terrain":7}],6:[function(require,module,exports){
+},{"./terrain":6}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -321,33 +323,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _elevationdata = require('./elevationdata');
 
-var SkyBox = function () {
-	function SkyBox() {
-		_classCallCheck(this, SkyBox);
-	}
+var _elevationdata2 = _interopRequireDefault(_elevationdata);
 
-	_createClass(SkyBox, [{
-		key: 'init',
-		value: function init(settings) {
-			console.log('skybox init');
-		}
-	}]);
-
-	return SkyBox;
-}();
-
-exports.default = SkyBox;
-
-},{}],7:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -360,6 +340,152 @@ var terrain3D = function () {
 		key: 'init',
 		value: function init(settings) {
 			console.log('nit terrain3D');
+
+			this.scene = settings.scene;
+		}
+	}, {
+		key: 'createMapTerrain',
+		value: function createMapTerrain() {
+			var imgW = void 0,
+			    imgH = void 0,
+			    res = 2,
+			    size = 8,
+			    resW = void 0,
+			    resH = void 0,
+			    wLength = void 0,
+			    hLength = void 0,
+			    geometry = void 0,
+			    allVertices = void 0,
+			    material = void 0,
+			    bg = void 0;
+
+			this.terrainData = _elevationdata2.default.getElevationMap().country.elevationArray;
+
+			console.log('this.terrainData', this.terrainData);
+
+			imgW = _elevationdata2.default.getElevationMap().country.imgW;
+			imgH = _elevationdata2.default.getElevationMap().country.imgH;
+			resW = Math.floor(imgW / res);
+			resH = Math.floor(imgH / res);
+			wLength = this.terrainData.length;
+			hLength = this.terrainData[0].length;
+
+			geometry = new THREE.PlaneGeometry(imgW * size, imgH * size, resW, resH);
+
+			allVertices = geometry.vertices.length;
+
+			material = new THREE.MeshPhongMaterial({
+				color: 0x380746,
+				shininess: 5,
+				side: THREE.DoubleSide,
+				shading: THREE.FlatShading,
+				opacity: 1
+			});
+
+			for (var i = 0; i < allVertices; i++) {
+				var x = geometry.vertices[i].x + imgW * size / 2;
+				var y = geometry.vertices[i].y + imgH * size / 2;
+
+				x = x / (imgW * size / wLength);
+				y = y / (imgH * size / hLength);
+
+				if (this.terrainData[x] && this.terrainData[x][hLength - y]) {
+					geometry.vertices[i].z = this.terrainData[x][hLength - y].scale / 8;
+				}
+			}
+
+			bg = new THREE.BufferGeometry().fromGeometry(geometry);
+			this.mapTerrainMesh = new THREE.Mesh(bg, material);
+
+			this.mapTerrainMesh.position.z = -30;
+			this.mapTerrainMesh.rotation.z = Math.PI / 2;
+
+			this.scene.add(this.mapTerrainMesh);
+
+			bg.verticesNeedUpdate = true;
+			bg.computeFaceNormals();
+			bg.computeVertexNormals();
+
+			geometry.dispose();
+			geometry = null;
+
+			this.initTerrainParticles();
+		}
+	}, {
+		key: 'initTerrainParticles',
+		value: function initTerrainParticles() {
+			var i = void 0,
+			    material = new THREE.PointCloudMaterial({
+				color: 0xe4173e,
+				size: 1,
+				map: THREE.ImageUtils.loadTexture('{{ASSET_PREFIX}}i/content/dot_simple.png'),
+				blending: THREE.AdditiveBlending,
+				opacity: 0.2
+			});
+
+			var lineMaterial = new THREE.LineBasicMaterial({
+				color: 0xe4173e,
+				linewidth: 1.0,
+				opacity: 0.3,
+				transparent: true,
+				fog: true
+			});
+
+			var geometry = new THREE.Geometry(),
+			    lineGeom = new THREE.Geometry(),
+			    step = 8,
+			    vertex = void 0,
+			    vertex2 = void 0,
+			    vertex3 = void 0,
+			    item = void 0,
+			    vertices = [];
+
+			for (var _i = 0; _i < this.terrainData.length; _i++) {
+				for (var j = 0; j < this.terrainData[_i].length; j++) {
+
+					if (this.terrainData[_i][j].active) {
+						vertex = new THREE.Vector3();
+
+						vertex.x = this.terrainData[_i][j].y * step;
+						vertex.y = this.terrainData[_i][j].x * step;
+						vertex.z = this.terrainData[_i][j].scale / 10;
+
+						if (this.terrainData[_i + 1]) {
+							item = this.terrainData[_i + 1][j];
+
+							if (item) {
+								vertex2 = new THREE.Vector3();
+
+								vertex2.x = item.y * step;
+								vertex2.y = item.x * step;
+								vertex2.z = item.scale / 10;
+
+								lineGeom.vertices.push(vertex);
+								lineGeom.vertices.push(vertex2);
+							}
+						}
+
+						item = this.terrainData[_i][j + 1];
+
+						geometry.vertices.push(vertex);
+						vertices.push(vertex);
+					}
+				}
+			}
+
+			this.mapLineMesh = new THREE.Line(lineGeom, lineMaterial, THREE.LinePieces);
+			this.scene.add(this.mapLineMesh);
+		}
+	}, {
+		key: 'updateMaterials',
+		value: function updateMaterials() {
+			if (this.mapTerrainMesh && this.mapTerrainMesh.material) {
+				this.mapTerrainMesh.material.needsUpdate = true;
+			}
+
+			if (this.mapLineMesh && this.mapLineMesh.material) {
+				this.mapLineMesh.material.needsUpdate = true;
+			}
 		}
 	}]);
 
@@ -368,7 +494,7 @@ var terrain3D = function () {
 
 exports.default = terrain3D;
 
-},{}],8:[function(require,module,exports){
+},{"./elevationdata":3}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -380,10 +506,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _imageprocessor = require('./imageprocessor');
 
 var _imageprocessor2 = _interopRequireDefault(_imageprocessor);
-
-var _skybox = require('./skybox');
-
-var _skybox2 = _interopRequireDefault(_skybox);
 
 var _elevationdata = require('./elevationdata');
 
@@ -417,11 +539,7 @@ var WebGl = function () {
 			this.initCamera();
 			this.initLights();
 
-			this.skybox = new _skybox2.default();
-			this.skybox.init({ scene: this.scene });
-
-			this.elevationData = new _elevationdata2.default();
-			this.elevationData.initElevationMaps().then(function () {
+			_elevationdata2.default.initElevationMaps().then(function () {
 				_this.init3dMap();
 			});
 
@@ -448,7 +566,7 @@ var WebGl = function () {
 	}, {
 		key: 'initLights',
 		value: function initLights() {
-			var ambientLight = new THREE.AmbientLight(0x222222),
+			var ambientLight = new THREE.AmbientLight(0x000000),
 			    pointLight = void 0;
 
 			this.scene.add(ambientLight);
@@ -487,7 +605,7 @@ var WebGl = function () {
 
 exports.default = WebGl;
 
-},{"./elevationdata":3,"./imageprocessor":4,"./map":5,"./skybox":6}]},{},[2])
+},{"./elevationdata":3,"./imageprocessor":4,"./map":5}]},{},[2])
 
 
 //# sourceMappingURL=map/app.js.map
