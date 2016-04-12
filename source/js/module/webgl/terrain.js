@@ -3,29 +3,24 @@ import ElevationData from './elevationdata';
 class terrain3D {
 
 	init(settings) {
-		console.log('nit terrain3D');
-
 		this.scene = settings.scene;
 	}
 
 	createMapTerrain() {
 		let imgW,
 			imgH,
-			res = 2,
+			res = 4,
 			size = 8,
+			scale = 7,
 			resW,
 			resH,
 			wLength,
 			hLength,
 			geometry,
 			allVertices,
-			material,
-			bg;
-
+			material;
 
 		this.terrainData = ElevationData.getElevationMap().country.elevationArray;
-
-		console.log('this.terrainData', this.terrainData);
 
 		imgW = ElevationData.getElevationMap().country.imgW;
 		imgH = ElevationData.getElevationMap().country.imgH;
@@ -39,7 +34,7 @@ class terrain3D {
 		allVertices = geometry.vertices.length;
 
 		material = new THREE.MeshPhongMaterial({
-			color: 0x380746,
+			color: 0xFEBE7E,
 			shininess: 5,
 			side: THREE.DoubleSide,
 			shading: THREE.FlatShading,
@@ -54,64 +49,46 @@ class terrain3D {
 			y = y / (imgH * size / hLength);
 
 			if (this.terrainData[x] && this.terrainData[x][hLength - y]) {
-				geometry.vertices[i].z = this.terrainData[x][hLength - y].scale / 8;
+				geometry.vertices[i].z = this.terrainData[x][hLength - y].scale / scale;
 			}
 		}
 
-		bg = new THREE.BufferGeometry().fromGeometry(geometry);
-		this.mapTerrainMesh = new THREE.Mesh(bg, material);
-
+		this.mapTerrainMesh = new THREE.Mesh(geometry, material);
 		this.mapTerrainMesh.position.z = -30;
 		this.mapTerrainMesh.rotation.z = Math.PI / 2;
 
 		this.scene.add(this.mapTerrainMesh);
 
-		bg.verticesNeedUpdate = true;
-		bg.computeFaceNormals();
-		bg.computeVertexNormals();
-
-		geometry.dispose();
-		geometry = null;
-
 		this.initTerrainParticles();
 	}
 
 	initTerrainParticles() {
-		let i,
-			material = new THREE.PointCloudMaterial({
-				color: 0xe4173e,
-				size: 1,
-				map: THREE.ImageUtils.loadTexture('{{ASSET_PREFIX}}i/content/dot_simple.png'),
-				blending: THREE.AdditiveBlending,
-				opacity: 0.2
-			});
-
 		let lineMaterial = new THREE.LineBasicMaterial({
-			color: 0xe4173e,
-			linewidth: 1.0,
-			opacity: 0.3,
-			transparent: true,
-			fog: true
-		});
-
-		let geometry = new THREE.Geometry(),
+				color: 0xaf3ecf,
+				linewidth: 1.5,
+				opacity: 0.2,
+				transparent: true,
+				fog: true
+			}),
+			geometry = new THREE.Geometry(),
 			lineGeom = new THREE.Geometry(),
 			step = 8,
 			vertex,
 			vertex2,
 			vertex3,
+			scale = 7,
 			item,
 			vertices = [];
 
-		for (let i = 0; i < this.terrainData.length; i++) {
-			for (let j = 0; j < this.terrainData[i].length; j++) {
+		for (let i = 0; i < this.terrainData.length; i += 1) {
+			for (let j = 0; j < this.terrainData[i].length; j += 2) {
 
 				if (this.terrainData[i][j].active) {
 					vertex = new THREE.Vector3();
 
 					vertex.x = this.terrainData[i][j].y * step;
 					vertex.y = this.terrainData[i][j].x * step;
-					vertex.z = this.terrainData[i][j].scale / 10;
+					vertex.z = this.terrainData[i][j].scale / scale;
 
 					if (this.terrainData[i + 1]) {
 						item = this.terrainData[i + 1][j];
@@ -121,7 +98,7 @@ class terrain3D {
 
 							vertex2.x = item.y * step;
 							vertex2.y = item.x * step;
-							vertex2.z = item.scale / 10;
+							vertex2.z = item.scale / scale;
 
 							lineGeom.vertices.push(vertex);
 							lineGeom.vertices.push(vertex2);
@@ -129,6 +106,17 @@ class terrain3D {
 					}
 
 					item = this.terrainData[i][j + 1];
+
+					/*if (item) {
+						vertex3 = new THREE.Vector3();
+
+						vertex3.x = item.y * step;
+						vertex3.y = item.x * step;
+						vertex3.z = item.scale / scale;
+
+						lineGeom.vertices.push(vertex);
+						lineGeom.vertices.push(vertex3);
+					}*/
 
 					geometry.vertices.push(vertex);
 					vertices.push(vertex);

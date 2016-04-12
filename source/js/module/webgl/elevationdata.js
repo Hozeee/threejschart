@@ -3,6 +3,7 @@ class ElevationData {
 	static initElevationMaps() {
 		//let imageURL = './i/azerelevation_map_small2.jpg';
 		let imageURL = './i/worldmap.jpg';
+		//let imageURL = './i/sam.jpg';
 
 		this.elevationData = {};
 

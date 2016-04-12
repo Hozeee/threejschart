@@ -80,6 +80,7 @@ var ElevationData = function () {
 
 			//let imageURL = './i/azerelevation_map_small2.jpg';
 			var imageURL = './i/worldmap.jpg';
+			//let imageURL = './i/sam.jpg';
 
 			this.elevationData = {};
 
@@ -339,8 +340,6 @@ var terrain3D = function () {
 	_createClass(terrain3D, [{
 		key: 'init',
 		value: function init(settings) {
-			console.log('nit terrain3D');
-
 			this.scene = settings.scene;
 		}
 	}, {
@@ -348,20 +347,18 @@ var terrain3D = function () {
 		value: function createMapTerrain() {
 			var imgW = void 0,
 			    imgH = void 0,
-			    res = 2,
+			    res = 4,
 			    size = 8,
+			    scale = 7,
 			    resW = void 0,
 			    resH = void 0,
 			    wLength = void 0,
 			    hLength = void 0,
 			    geometry = void 0,
 			    allVertices = void 0,
-			    material = void 0,
-			    bg = void 0;
+			    material = void 0;
 
 			this.terrainData = _elevationdata2.default.getElevationMap().country.elevationArray;
-
-			console.log('this.terrainData', this.terrainData);
 
 			imgW = _elevationdata2.default.getElevationMap().country.imgW;
 			imgH = _elevationdata2.default.getElevationMap().country.imgH;
@@ -375,7 +372,7 @@ var terrain3D = function () {
 			allVertices = geometry.vertices.length;
 
 			material = new THREE.MeshPhongMaterial({
-				color: 0x380746,
+				color: 0xFEBE7E,
 				shininess: 5,
 				side: THREE.DoubleSide,
 				shading: THREE.FlatShading,
@@ -390,82 +387,73 @@ var terrain3D = function () {
 				y = y / (imgH * size / hLength);
 
 				if (this.terrainData[x] && this.terrainData[x][hLength - y]) {
-					geometry.vertices[i].z = this.terrainData[x][hLength - y].scale / 8;
+					geometry.vertices[i].z = this.terrainData[x][hLength - y].scale / scale;
 				}
 			}
 
-			bg = new THREE.BufferGeometry().fromGeometry(geometry);
-			this.mapTerrainMesh = new THREE.Mesh(bg, material);
-
+			this.mapTerrainMesh = new THREE.Mesh(geometry, material);
 			this.mapTerrainMesh.position.z = -30;
 			this.mapTerrainMesh.rotation.z = Math.PI / 2;
 
 			this.scene.add(this.mapTerrainMesh);
-
-			bg.verticesNeedUpdate = true;
-			bg.computeFaceNormals();
-			bg.computeVertexNormals();
-
-			geometry.dispose();
-			geometry = null;
 
 			this.initTerrainParticles();
 		}
 	}, {
 		key: 'initTerrainParticles',
 		value: function initTerrainParticles() {
-			var i = void 0,
-			    material = new THREE.PointCloudMaterial({
-				color: 0xe4173e,
-				size: 1,
-				map: THREE.ImageUtils.loadTexture('{{ASSET_PREFIX}}i/content/dot_simple.png'),
-				blending: THREE.AdditiveBlending,
-				opacity: 0.2
-			});
-
 			var lineMaterial = new THREE.LineBasicMaterial({
-				color: 0xe4173e,
-				linewidth: 1.0,
-				opacity: 0.3,
+				color: 0xaf3ecf,
+				linewidth: 1.5,
+				opacity: 0.2,
 				transparent: true,
 				fog: true
-			});
-
-			var geometry = new THREE.Geometry(),
+			}),
+			    geometry = new THREE.Geometry(),
 			    lineGeom = new THREE.Geometry(),
 			    step = 8,
 			    vertex = void 0,
 			    vertex2 = void 0,
 			    vertex3 = void 0,
+			    scale = 7,
 			    item = void 0,
 			    vertices = [];
 
-			for (var _i = 0; _i < this.terrainData.length; _i++) {
-				for (var j = 0; j < this.terrainData[_i].length; j++) {
+			for (var i = 0; i < this.terrainData.length; i += 1) {
+				for (var j = 0; j < this.terrainData[i].length; j += 2) {
 
-					if (this.terrainData[_i][j].active) {
+					if (this.terrainData[i][j].active) {
 						vertex = new THREE.Vector3();
 
-						vertex.x = this.terrainData[_i][j].y * step;
-						vertex.y = this.terrainData[_i][j].x * step;
-						vertex.z = this.terrainData[_i][j].scale / 10;
+						vertex.x = this.terrainData[i][j].y * step;
+						vertex.y = this.terrainData[i][j].x * step;
+						vertex.z = this.terrainData[i][j].scale / scale;
 
-						if (this.terrainData[_i + 1]) {
-							item = this.terrainData[_i + 1][j];
+						if (this.terrainData[i + 1]) {
+							item = this.terrainData[i + 1][j];
 
 							if (item) {
 								vertex2 = new THREE.Vector3();
 
 								vertex2.x = item.y * step;
 								vertex2.y = item.x * step;
-								vertex2.z = item.scale / 10;
+								vertex2.z = item.scale / scale;
 
 								lineGeom.vertices.push(vertex);
 								lineGeom.vertices.push(vertex2);
 							}
 						}
 
-						item = this.terrainData[_i][j + 1];
+						item = this.terrainData[i][j + 1];
+
+						/*if (item) {
+      	vertex3 = new THREE.Vector3();
+      		vertex3.x = item.y * step;
+      	vertex3.y = item.x * step;
+      	vertex3.z = item.scale / scale;
+      		lineGeom.vertices.push(vertex);
+      	lineGeom.vertices.push(vertex3);
+      }*/
 
 						geometry.vertices.push(vertex);
 						vertices.push(vertex);
@@ -533,7 +521,7 @@ var WebGl = function () {
 
 			this.renderer = new THREE.WebGLRenderer({ antialias: true, clearColor: 0x000000 });
 			this.renderer.setSize(window.innerWidth, window.innerHeight);
-			this.renderer.setClearColor(0x19081b, 1);
+			this.renderer.setClearColor(0xFFEDBC, 1);
 			document.getElementById('webgl-content').appendChild(this.renderer.domElement);
 
 			this.initCamera();
@@ -548,6 +536,15 @@ var WebGl = function () {
 			window.addEventListener('resize', this.onWindowResize.bind(this), false);
 			this.inited = true;
 			this.needRender = true;
+
+			this.scene.fog = new THREE.FogExp2(0xFFEDBC, 0.0004);
+
+			$(window).focus(function () {
+				this.needRender = true;
+			});
+			$(window).blur(function () {
+				this.needRender = false;
+			});
 		}
 	}, {
 		key: 'init3dMap',
@@ -555,24 +552,136 @@ var WebGl = function () {
 			this.map3d = new _map2.default();
 			this.map3d.init({ scene: this.scene, camera: this.camera });
 			this.map3d.initTerrain();
+
+			this.loadFont();
+		}
+	}, {
+		key: 'loadFont',
+		value: function loadFont() {
+			var _this2 = this;
+
+			var loader = new THREE.FontLoader();
+
+			loader.load('fonts/droid.typeface.js', function (response) {
+				_this2.font = response;
+
+				_this2.initStatistics();
+			});
+		}
+	}, {
+		key: 'initStatistics',
+		value: function initStatistics() {
+			//AFRICA
+			this.createColumn({
+				x: 250,
+				z: -100,
+				height: 500,
+				text: '75%',
+				color: 0x57385C
+			});
+
+			//SAMERICA
+			this.createColumn({
+				x: -850,
+				z: 230,
+				height: 300,
+				text: '45%',
+				color: 0xA75265
+			});
+
+			//NAMERCIA
+			this.createColumn({
+				x: -1150,
+				z: -550,
+				height: 600,
+				text: '85%',
+				color: 0xA75265
+			});
+
+			//Europe
+			this.createColumn({
+				x: 200,
+				z: -600,
+				height: 700,
+				text: '95%',
+				color: 0x3F195C
+			});
+
+			//Asia
+			this.createColumn({
+				x: 1200,
+				z: -600,
+				height: 400,
+				text: '45%',
+				color: 0xA75265
+			});
+
+			//Australia
+			this.createColumn({
+				x: 1700,
+				z: 600,
+				height: 400,
+				text: '45%',
+				color: 0xA75265
+			});
+		}
+	}, {
+		key: 'createColumn',
+		value: function createColumn(settings) {
+			var geometry = new THREE.BoxGeometry(50, settings.height, 50),
+			    material = new THREE.MeshPhongMaterial({ color: settings.color }),
+			    textMaterial = new THREE.MeshPhongMaterial({ color: settings.color, shading: THREE.FlatShading }),
+			    cube = new THREE.Mesh(geometry, material),
+			    height = 4,
+			    size = 30,
+			    textGeometry = new THREE.TextGeometry(settings.text, {
+				size: size,
+				height: height,
+				font: this.font,
+				material: 0,
+				extrudeMaterial: 1,
+				curveSegments: 4,
+				bevelEnabled: false
+			}),
+			    textMesh = void 0;
+
+			textGeometry.computeBoundingBox();
+			textGeometry.computeVertexNormals();
+			textGeometry.verticesNeedUpdate = true;
+			textGeometry.normalsNeedUpdate = true;
+
+			textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+			textMesh.position.x = settings.x + 40;
+			textMesh.position.z = settings.z;
+			textMesh.position.y = settings.height / 2 - 40;
+
+			cube.position.x = settings.x;
+			cube.position.z = settings.z;
+
+			this.scene.add(textMesh);
+			this.scene.add(cube);
 		}
 	}, {
 		key: 'initCamera',
 		value: function initCamera() {
 			this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000);
-			this.camera.position.z = 500;
+			this.camera.position.z = 1500;
+			this.camera.position.y = 7000;
 			this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+
+			TweenMax.to(this.camera.position, 1, { delay: 0.3, z: 1500, y: 1600, ease: Circ.easeOut });
 		}
 	}, {
 		key: 'initLights',
 		value: function initLights() {
-			var ambientLight = new THREE.AmbientLight(0x000000),
+			var ambientLight = new THREE.AmbientLight(0xFFEDBC),
 			    pointLight = void 0;
 
 			this.scene.add(ambientLight);
 
-			pointLight = new THREE.PointLight(0xffffff, 1, 0);
-			pointLight.position.set(0, 500, 0);
+			pointLight = new THREE.PointLight(0xffc4d5, 1, 0);
+			pointLight.position.set(500, 1000, 0);
 			this.scene.add(pointLight);
 		}
 	}, {
