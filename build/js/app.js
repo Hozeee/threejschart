@@ -537,7 +537,7 @@ var WebGl = function () {
 			this.inited = true;
 			this.needRender = true;
 
-			this.scene.fog = new THREE.FogExp2(0xFFEDBC, 0.0004);
+			this.scene.fog = new THREE.FogExp2(0xFFEDBC, 0.0003);
 
 			$(window).focus(function () {
 				this.needRender = true;
@@ -577,7 +577,9 @@ var WebGl = function () {
 				z: -100,
 				height: 500,
 				text: '75%',
-				color: 0x57385C
+				text2: 'AFRICA',
+				color: 0x57385C,
+				delay: 0
 			});
 
 			//SAMERICA
@@ -585,26 +587,32 @@ var WebGl = function () {
 				x: -850,
 				z: 230,
 				height: 300,
+				text2: 'SOUTH AMERICA',
 				text: '45%',
-				color: 0xA75265
+				color: 0xA75265,
+				delay: 0.3
 			});
 
 			//NAMERCIA
 			this.createColumn({
 				x: -1150,
 				z: -550,
-				height: 600,
+				height: 800,
+				text2: 'NORTH AMERICA',
 				text: '85%',
-				color: 0xA75265
+				color: 0xA75265,
+				delay: 0.5
 			});
 
 			//Europe
 			this.createColumn({
 				x: 200,
 				z: -600,
-				height: 700,
+				height: 1000,
+				text2: 'EUROPE',
 				text: '95%',
-				color: 0x3F195C
+				color: 0x3F195C,
+				delay: 0.7
 			});
 
 			//Asia
@@ -612,8 +620,10 @@ var WebGl = function () {
 				x: 1200,
 				z: -600,
 				height: 400,
+				text2: 'ASIA',
 				text: '45%',
-				color: 0xA75265
+				color: 0xA75265,
+				delay: 0.9
 			});
 
 			//Australia
@@ -621,8 +631,10 @@ var WebGl = function () {
 				x: 1700,
 				z: 600,
 				height: 400,
+				text2: 'AUSTRALIA',
 				text: '45%',
-				color: 0xA75265
+				color: 0xA75265,
+				delay: 1
 			});
 		}
 	}, {
@@ -632,9 +644,19 @@ var WebGl = function () {
 			    material = new THREE.MeshPhongMaterial({ color: settings.color }),
 			    textMaterial = new THREE.MeshPhongMaterial({ color: settings.color, shading: THREE.FlatShading }),
 			    cube = new THREE.Mesh(geometry, material),
+			    wrapper = void 0,
 			    height = 4,
 			    size = 30,
 			    textGeometry = new THREE.TextGeometry(settings.text, {
+				size: 80,
+				height: height,
+				font: this.font,
+				material: 0,
+				extrudeMaterial: 1,
+				curveSegments: 4,
+				bevelEnabled: false
+			}),
+			    textGeometry2 = new THREE.TextGeometry(settings.text2, {
 				size: size,
 				height: height,
 				font: this.font,
@@ -643,24 +665,31 @@ var WebGl = function () {
 				curveSegments: 4,
 				bevelEnabled: false
 			}),
-			    textMesh = void 0;
-
-			textGeometry.computeBoundingBox();
-			textGeometry.computeVertexNormals();
-			textGeometry.verticesNeedUpdate = true;
-			textGeometry.normalsNeedUpdate = true;
+			    textMesh = void 0,
+			    textMesh2 = void 0;
 
 			textMesh = new THREE.Mesh(textGeometry, textMaterial);
+			textMesh2 = new THREE.Mesh(textGeometry2, textMaterial);
 
 			textMesh.position.x = settings.x + 40;
+			textMesh2.position.x = settings.x - 25;
 			textMesh.position.z = settings.z;
-			textMesh.position.y = settings.height / 2 - 40;
+			textMesh2.position.z = settings.z;
+			textMesh.position.y = settings.height / 2 - 80;
+			textMesh2.position.y = settings.height / 2 + 20;
 
 			cube.position.x = settings.x;
 			cube.position.z = settings.z;
 
-			this.scene.add(textMesh);
-			this.scene.add(cube);
+			wrapper = new THREE.Object3D();
+			wrapper.position.y = -700;
+			this.scene.add(wrapper);
+
+			TweenMax.to(wrapper.position, 1.8, { delay: 1 + settings.delay, y: 0, ease: Circ.easeOut });
+
+			wrapper.add(textMesh);
+			wrapper.add(textMesh2);
+			wrapper.add(cube);
 		}
 	}, {
 		key: 'initCamera',
@@ -670,7 +699,7 @@ var WebGl = function () {
 			this.camera.position.y = 7000;
 			this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
 
-			TweenMax.to(this.camera.position, 1, { delay: 0.3, z: 1500, y: 1600, ease: Circ.easeOut });
+			TweenMax.to(this.camera.position, 1.4, { delay: 0.4, z: 1500, y: 1600, ease: Circ.easeOut });
 		}
 	}, {
 		key: 'initLights',
